@@ -2,7 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const multer = require('multer');
 const path = require('path');
-const upload = multer({ dest: 'tmp/' });
+const upload = multer({ dest: '/tmp' });
 const db = require('./src/config/db');
 const cloudinary = require('./src/config/cloudinary');
 
