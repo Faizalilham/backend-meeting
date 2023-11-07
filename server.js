@@ -12,7 +12,7 @@ const port = 3000;
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.post('/create-meeting', upload.single('image'), async (req, res) => {
+app.post('/create-meeting', async (req, res) => {
     try {
         const extension = path.extname(req.file.originalname).toLowerCase();
 
@@ -25,7 +25,7 @@ app.post('/create-meeting', upload.single('image'), async (req, res) => {
             });
         }
 
-        const result = await cloudinary.uploader.upload(req.file.path); // Upload the file path to Cloudinary
+        const result = await cloudinary.uploader.upload(req.file.path, { resource_type: 'auto' });
 
         const sql = 'INSERT INTO meeting SET ?';
         const values = {
@@ -40,36 +40,7 @@ app.post('/create-meeting', upload.single('image'), async (req, res) => {
             date: req.body.date
         };
 
-        db.query(sql, values, (err, result) => {
-            if (err) {
-                console.log(err);
-                return res.status(500).json({
-                    code: 500,
-                    message: 'Internal Server Error',
-                    status: 'Error',
-                    data: err
-                });
-            }
-
-            db.query('SELECT * FROM meeting WHERE id = ?', result.insertId, (err, rows) => {
-                if (err) {
-                    console.log(err);
-                    return res.status(500).json({
-                        code: 500,
-                        message: 'Internal Server Error',
-                        status: 'Error',
-                        data: err
-                    });
-                }
-
-                res.status(200).json({
-                    code: 200,
-                    message: 'OK',
-                    status: 'Success',
-                    data: rows[0]
-                });
-            });
-        });
+        // Rest of your database and response code
     } catch (err) {
         console.log(err);
         res.status(500).json({
