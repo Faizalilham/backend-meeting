@@ -2,7 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const multer = require('multer');
 const path = require('path');
-const upload = multer({ dest: 'uploads/' });
+const upload = multer({ dest: 'tmp/' });
 const db = require('./src/config/db');
 const cloudinary = require('./src/config/cloudinary');
 
@@ -12,7 +12,7 @@ const port = 3000;
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.post('/create-meeting', async (req, res) => {
+app.post('/create-meeting', upload.single('image'), async (req, res) => {
     try {
         const extension = path.extname(req.file.originalname).toLowerCase();
 
@@ -25,7 +25,7 @@ app.post('/create-meeting', async (req, res) => {
             });
         }
 
-        const result = await cloudinary.uploader.upload(req.file.path, { resource_type: 'auto' });
+        const result = await cloudinary.uploader.upload(req.file.path); // Upload the file path to Cloudinary
 
         const sql = 'INSERT INTO meeting SET ?';
         const values = {
@@ -40,7 +40,36 @@ app.post('/create-meeting', async (req, res) => {
             date: req.body.date
         };
 
-        // Rest of your database and response code
+        db.query(sql, values, (err, result) => {
+            if (err) {
+                console.log(err);
+                return res.status(500).json({
+                    code: 500,
+                    message: 'Internal Server Error',
+                    status: 'Error',
+                    data: err
+                });
+            }
+
+            db.query('SELECT * FROM meeting WHERE id = ?', result.insertId, (err, rows) => {
+                if (err) {
+                    console.log(err);
+                    return res.status(500).json({
+                        code: 500,
+                        message: 'Internal Server Error',
+                        status: 'Error',
+                        data: err
+                    });
+                }
+
+                res.status(200).json({
+                    code: 200,
+                    message: 'OK',
+                    status: 'Success',
+                    data: rows[0]
+                });
+            });
+        });
     } catch (err) {
         console.log(err);
         res.status(500).json({
