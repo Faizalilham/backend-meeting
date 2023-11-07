@@ -11,12 +11,10 @@ const port = 3000;
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.post('/create-meeting', multer({ dest: 'uploads/' }).single('image'), async (req, res) => {
+app.post('/create-meeting', async (req, res) => {
     try {
-        // Mendapatkan ekstensi file
         const extension = path.extname(req.file.originalname).toLowerCase();
 
-        // Mengecek apakah ekstensi file adalah .webp atau .svg
         if (extension === '.webp' || extension === '.svg') {
             return res.status(400).json({
                 code: 400,
@@ -26,7 +24,8 @@ app.post('/create-meeting', multer({ dest: 'uploads/' }).single('image'), async 
             });
         }
 
-        const result = await cloudinary.uploader.upload(req.file.path);
+        const result = await cloudinary.uploader.upload(req.file.path); // Upload the file path to Cloudinary
+
         const sql = 'INSERT INTO meeting SET ?';
         const values = {
             title: req.body.title,
@@ -51,7 +50,6 @@ app.post('/create-meeting', multer({ dest: 'uploads/' }).single('image'), async 
                 });
             }
 
-            // Mengambil data yang baru saja dimasukkan
             db.query('SELECT * FROM meeting WHERE id = ?', result.insertId, (err, rows) => {
                 if (err) {
                     console.log(err);
@@ -67,7 +65,7 @@ app.post('/create-meeting', multer({ dest: 'uploads/' }).single('image'), async 
                     code: 200,
                     message: 'OK',
                     status: 'Success',
-                    data: rows[0] // Mengirim data yang baru saja dimasukkan
+                    data: rows[0]
                 });
             });
         });
@@ -81,6 +79,7 @@ app.post('/create-meeting', multer({ dest: 'uploads/' }).single('image'), async 
         });
     }
 });
+
 
 app.get('/meetings', (req, res) => {
     const sql = 'SELECT * FROM meeting';
