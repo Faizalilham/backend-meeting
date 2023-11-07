@@ -2,6 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const multer = require('multer');
 const path = require('path');
+const upload = multer({ dest: 'uploads/' });
 const db = require('./src/config/db');
 const cloudinary = require('./src/config/cloudinary');
 
@@ -11,7 +12,7 @@ const port = 3000;
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.post('/create-meeting', async (req, res) => {
+app.post('/create-meeting', upload.single('image'), async (req, res) => {
     try {
         const extension = path.extname(req.file.originalname).toLowerCase();
 
