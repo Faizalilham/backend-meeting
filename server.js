@@ -27,7 +27,7 @@ app.post('/create-meeting', upload.single('image'), async (req, res) => {
 
         const result = await cloudinary.uploader.upload(req.file.path); // Upload the file path to Cloudinary
 
-        const sql = 'INSERT INTO meeting SET ?';
+        const sql = 'INSERT INTO erporio_2nd.meeting SET ?';
         const values = {
             title: req.body.title,
             location: req.body.location,
@@ -51,7 +51,7 @@ app.post('/create-meeting', upload.single('image'), async (req, res) => {
                 });
             }
 
-            db.query('SELECT * FROM meeting WHERE id = ?', result.insertId, (err, rows) => {
+            db.query('SELECT * FROM erporio_2nd.meeting WHERE id = ?', result.insertId, (err, rows) => {
                 if (err) {
                     console.log(err);
                     return res.status(500).json({
@@ -83,7 +83,7 @@ app.post('/create-meeting', upload.single('image'), async (req, res) => {
 
 
 app.get('/meetings', (req, res) => {
-    const sql = 'SELECT * FROM meeting';
+    const sql = 'SELECT * FROM erporio_2nd.meeting';
 
     db.query(sql, (err, results) => {
         if (err) {
