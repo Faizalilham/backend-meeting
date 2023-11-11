@@ -81,6 +81,30 @@ app.post('/create-meeting', upload.single('image'), async (req, res) => {
     }
 });
 
+app.delete('/delete-meetings', (req, res) => {
+    const deleteSql = 'DELETE FROM meeting';
+
+    db.query(deleteSql, (deleteErr, deleteResults) => {
+        if (deleteErr) {
+            console.log(deleteErr);
+            return res.status(500).json({
+                code: 500,
+                message: 'Internal Server Error',
+                status: 'Error',
+                data: deleteErr
+            });
+        }
+
+        res.status(200).json({
+            code: 200,
+            message: 'OK',
+            status: 'Success',
+            data: deleteResults
+        });
+    });
+});
+
+
 
 app.get('/meetings', (req, res) => {
     const sql = 'SELECT * FROM meeting';
